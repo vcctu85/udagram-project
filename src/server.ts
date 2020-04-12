@@ -33,23 +33,38 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
-    res.send("try GET /filteredimage?image_url={{}}")
-  } );
+  
 
-  app.get("/filteredimage/", async (req, res) => {
+  app.get("/filteredimage", async (req, res) => {
     let { image_url } = req.query;
 
     if ( !image_url ) {
       return res.status(400).send('image_url is required.');
     }
-    var filteredpath  = filterImageFromURL(image_url);
-    //deleteLocalFiles();
-    res.sendFile(filteredpath.toString());
+    const filteredpath  = filterImageFromURL(image_url);
 
+    filteredpath.catch(err => {
+      console.error('error');
+    })
+    
+   filteredpath.then((path) => {
+    res.status(200).sendFile(path, function() {
+        deleteLocalFiles([path]);
+      });
+    }).catch((errorMessage) => {
+      res.status(400).send("Error filtering path");
+     });
+
+    process.on('unhandledRejection', (reason, promise) => {
+        console.log('Unhandled Rejection Reason: ', reason);
+    });
+    
 
 });
   
+app.get( "/", async ( req, res ) => {
+  res.send("try GET /filteredimage?image_url={{}}")
+} );
 
   // Start the Server
   app.listen( port, () => {

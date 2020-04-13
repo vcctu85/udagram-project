@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
+
 (async () => {
 
   // Init the Express application
@@ -41,13 +42,14 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
     let { image_url } = req.query;
 
     if ( !image_url ) {
-      return res.status(400).send('image_url is required.');
+      return res.status(400).send('image_url is required!');
     }
-    var filteredpath  = filterImageFromURL(image_url);
-    //deleteLocalFiles();
-    res.sendFile(filteredpath.toString());
-
-
+    let filteredimage  = await filterImageFromURL(image_url);
+    
+    return res.status(200).sendFile(filteredimage, function() {
+        deleteLocalFiles([filteredimage]);
+      });
+    
 });
   
 

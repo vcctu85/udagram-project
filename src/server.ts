@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
+
 (async () => {
 
   // Init the Express application
@@ -39,27 +40,18 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
     let { image_url } = req.query;
 
     if ( !image_url ) {
-      return res.status(400).send('image_url is required.');
+      return res.status(400).send('image_url is required!');
     }
-    const filteredpath  = filterImageFromURL(image_url);
-
-    filteredpath.catch(err => {
-      console.error('error');
-    })
+    const filteredimage  = filterImageFromURL(image_url);
     
-   filteredpath.then((path) => {
-    res.status(200).sendFile(path, function() {
+    filteredimage.then((path) => {
+      return res.status(200).sendFile(path, function() {
         deleteLocalFiles([path]);
       });
-    }).catch((errorMessage) => {
-      res.status(400).send("Error filtering path");
-     });
-
-    process.on('unhandledRejection', (reason, promise) => {
-        console.log('Unhandled Rejection Reason: ', reason);
+    }).catch((error) => {
+      return res.status(400).send("Error filtering image from URL");
     });
     
-
 });
   
 app.get( "/", async ( req, res ) => {
